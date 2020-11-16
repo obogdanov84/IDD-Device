@@ -29,6 +29,9 @@ int moveDirection = 1; // initial right direction
 
 void displayTime(int xPos, int yPos, int hour, int minutes, int seconds);
 void keypadMoveStep(void);
+void displayEvent(char keyPress, int xPos, int yPos);
+void keypadMoveStep(void);
+void playNote(void);
 
 //-------------EEPROM 2LC64 init and defines-----------------
 //for hex display uncomment below two lines, eeprom
@@ -63,10 +66,17 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 
 int keyPress = 0;
 
+// speaker variables
+  int noteCount = 2;
+  int noteFrequency =1000;
+  int noteDuration =20;
+
 void setup() {
   Serial.begin(9600);
 
   ee.begin();
+
+  pinMode(A1, OUTPUT);
 
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
@@ -113,11 +123,13 @@ void setup() {
 void loop() {
 
 
-keypadMoveStep();
+// keypadMoveStep();
 
-displayTime(xPosition,yPosition,rtc.getHour(),rtc.getMinute(),rtc.getSecond());
+// displayTime(xPosition,yPosition,rtc.getHour(),rtc.getMinute(),rtc.getSecond());
 
-delay(10);
+displayEvent(customKeypad.getKey(), 0,0);
+
+
 
 }
 
@@ -199,6 +211,83 @@ void keypadMoveStep(void)
     yPosition+=4;
     break;
 }
+}
+
+void displayEvent(char keyPress, int xPos, int yPos)
+{
+  display.clearDisplay();
+    // set up text properites
+    display.setTextSize(1);      // Normal 1:1 pixel scale
+    display.setTextColor(SSD1306_WHITE); // Draw white text
+    display.cp437(true);
+    display.setCursor(xPos,yPos);
+  switch(keyPress)
+  {
+    case('1'): //SROM
+      //put in line to center the data
+      display.print("SROM");
+      playNote();
+      break;
+    
+    case('2'): //SINTO
+      //put in line to center the data
+      display.print("SINTO");
+      playNote();
+      break;
+
+    case('3'): //VERTEX
+      //put in line to center the data
+      display.print("VERTEX");
+      playNote();
+      break;
+
+    case('4'): //HEAD
+      //put in line to center the data
+      display.print("HEAD");
+      playNote();
+      break;
+
+    case('5'): //INFANT
+      //put in line to center the data
+      display.print("INFANT");
+      playNote();
+      break;
+
+    case('6'): //PLACENTA
+      //put in line to center the data
+      display.print("PLACENTA");
+      playNote();
+      break;
+
+    case('7'): //VE
+      //put in line to center the data
+      display.print("VE");
+      playNote();
+      break;
+
+    case('8'): //EMERGENCY
+      //put in line to center the data
+      display.print("EMERGENCY");
+      playNote();
+      break;
+
+    default:
+   displayTime(xPosition,yPosition,rtc.getHour(),rtc.getMinute(),rtc.getSecond());
+    break;
+
+  }
+  display.display();
+  delay(100);
+
+}
+
+void playNote (void)
+{
+  for (int i = 0;i<noteCount; i++)
+  {
+   tone(A1,noteFrequency, noteDuration); //pin frequency, duration
+   delay (noteDuration+5);
+  }
 }
 
 
