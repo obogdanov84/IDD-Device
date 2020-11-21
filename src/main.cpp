@@ -11,6 +11,15 @@
 
 Melopero_RV3028 rtc;
 
+//-----------------State machione defines-----------------//
+
+int state = 0;
+#define REVIEW 0
+#define LOGGING 1
+int stateXPos = 0;
+int stateYPos = 0;
+
+
 //-------------Screen init and defines 128x32-----------------
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -32,6 +41,9 @@ void keypadMoveStep(void);
 void displayEvent(char keyPress, int xPos, int yPos);
 void keypadMoveStep(void);
 void playNote(void);
+void pushState (void);
+void displayState(void);
+void pollKeyboard (char keyPress);
 
 //-------------EEPROM 2LC64 init and defines-----------------
 //for hex display uncomment below two lines, eeprom
@@ -121,23 +133,25 @@ void setup() {
 
 }
 void loop() {
+pollKeyboard(customKeypad.getKey());
 
 
-// keypadMoveStep();
+// display setup
+display.clearDisplay();
+displayTime(0,0,rtc.getHour(), rtc.getMinute(), rtc.getSecond());
+displayState();
+display.display();
 
-// displayTime(xPosition,yPosition,rtc.getHour(),rtc.getMinute(),rtc.getSecond());
 
-displayEvent(customKeypad.getKey(), 0,0);
-
-
+//tick definition 
+//delay (10);
 
 }
 
 
 void displayTime(int xPos, int yPos, int hour, int minutes, int seconds)
 {
-    display.clearDisplay();
-    // set up text properites
+    //display.clearDisplay(); moved to main loop    // set up text properites
     display.setTextSize(1);      // Normal 1:1 pixel scale
     display.setTextColor(SSD1306_WHITE); // Draw white text
     display.cp437(true);
@@ -186,8 +200,8 @@ void displayTime(int xPos, int yPos, int hour, int minutes, int seconds)
     }
     display.print(seconds);
 
-    display.display();
-    delay(10);
+   // display.display();
+   // delay(10);
 }
 
 void keypadMoveStep(void)
@@ -289,5 +303,113 @@ void playNote (void)
    delay (noteDuration+5);
   }
 }
+
+void pushState (void)
+{
+    if(state == 0)
+    {
+      state=1;
+    }
+    if(state == 1)
+    {
+      state = 0;
+    }
+  
+}
+
+void displayState(void)
+{
+  
+  display.setTextSize(1);      // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE); // Draw white text
+  display.cp437(true);
+  if (state == LOGGING)
+  {
+    stateXPos = 130-(CHAR_WIDTH_1*7);
+    display.setCursor(stateXPos,stateYPos);
+    display.println("LOGGING");
+  }
+  else
+  {
+    stateXPos = 130-(CHAR_WIDTH_1*7);
+    display.setCursor(stateXPos,stateYPos);
+    display.println("REVIEW");
+  }
+  //display.display();
+  
+}
+
+void pollKeyboard (char keyPress)
+{
+  switch(keyPress)
+  {
+    case('1'): //SROM
+      //put in line to center the data
+      
+      playNote();
+      break;
+    
+    case('2'): //SINTO
+      //put in line to center the data
+      
+      playNote();
+      break;
+
+    case('3'): //VERTEX
+      //put in line to center the data
+      
+      playNote();
+      break;
+
+    case('4'): //HEAD
+      //put in line to center the data
+      
+      playNote();
+      break;
+
+    case('5'): //INFANT
+      //put in line to center the data
+      
+      playNote();
+      break;
+
+    case('6'): //PLACENTA
+      //put in line to center the data
+      
+      playNote();
+      break;
+
+    case('7'): //VE
+      //put in line to center the data
+      
+      playNote();
+      break;
+
+    case('8'): //EMERGENCY
+      //put in line to center the data
+      playNote();
+      break;
+      
+    case('F'):
+
+      state=0;
+      playNote();
+    break;
+
+    case('G'):
+
+      state=1;
+      playNote();
+    break;
+
+
+
+    default:
+  
+    break;
+
+  } 
+}
+
 
 
