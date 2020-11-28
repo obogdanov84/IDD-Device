@@ -11,7 +11,8 @@
 
 Melopero_RV3028 rtc;
 
-//-----------------State machione defines-----------------//
+//-----------------State machine defines-----------------//
+
 
 int state = 0;
 #define REVIEW 0
@@ -43,7 +44,7 @@ void keypadMoveStep(void);
 void playNote(void);
 void pushState (void);
 void displayState(void);
-void pollKeyboard (char keyPress);
+void keyboardAction (char keyPress);
 
 //-------------EEPROM 2LC64 init and defines-----------------
 //for hex display uncomment below two lines, eeprom
@@ -89,6 +90,9 @@ void setup() {
   ee.begin();
 
   pinMode(A1, OUTPUT);
+  pinMode(9,INPUT);
+  digitalWrite(9, LOW); // pin B5 is 9 on the board
+  state = digitalRead(PINB5); 
 
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
@@ -133,14 +137,18 @@ void setup() {
 
 }
 void loop() {
-pollKeyboard(customKeypad.getKey());
+  display.clearDisplay();
+  state = digitalRead(9);
+  keyboardAction(customKeypad.getKey());
 
 
-// display setup
-display.clearDisplay();
-displayTime(0,0,rtc.getHour(), rtc.getMinute(), rtc.getSecond());
-displayState();
-display.display();
+  // display setup
+ 
+  displayTime(0,0,rtc.getHour(), rtc.getMinute(), rtc.getSecond());
+  displayState();
+  display.display();
+
+  
 
 
 //tick definition 
@@ -339,13 +347,16 @@ void displayState(void)
   
 }
 
-void pollKeyboard (char keyPress)
+// defines the keyboard buttons as deifferent state based 
+void keyboardAction (char keyPress)
 {
+
+  if (state == 1)
+  {
   switch(keyPress)
   {
     case('1'): //SROM
-      //put in line to center the data
-      
+            
       playNote();
       break;
     
@@ -392,13 +403,13 @@ void pollKeyboard (char keyPress)
       
     case('F'):
 
-      state=0;
+      
       playNote();
     break;
 
     case('G'):
 
-      state=1;
+      
       playNote();
     break;
 
@@ -407,6 +418,34 @@ void pollKeyboard (char keyPress)
     default:
   
     break;
+
+  }
+  }
+  else if (state == 0)
+  {
+    switch (keyPress)
+    {
+    case '2': //up 
+      display.setTextSize(1);      // Normal 1:1 pixel scale
+      display.setTextColor(SSD1306_WHITE); // Draw white text
+      display.cp437(true);
+      display.setCursor(0,10);
+      display.println("UP");
+      playNote(); 
+      break;
+
+    case 'A': //down 
+      display.setTextSize(1);      // Normal 1:1 pixel scale
+      display.setTextColor(SSD1306_WHITE); // Draw white text
+      display.cp437(true);
+      display.setCursor(0,10);
+      display.println("DOWN");
+      playNote(); 
+      break;
+    
+    default:
+      break;
+    }
 
   } 
 }
